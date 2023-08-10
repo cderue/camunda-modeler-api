@@ -1,0 +1,2697 @@
+openapi: 3.0.1
+info:
+  title: Web Modeler REST API
+  version: 41f4f56
+servers:
+- description: Generated server url
+  url: https://modeler.cloud.camunda.io
+paths:
+  /api/v1/collaborators:
+    put:
+      description: |
+        Adds a new collaborator to a project or modifies the permission level of an existing collaborator.<br/><br/>
+        <strong>Note:</strong> Only users that are part of the authorized organization
+        (see <code>GET /api/v1/info</code>) <i>and</i> logged in to Web Modeler at least once can be added to a
+        project.
+      operationId: modifyCollaborator
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCollaboratorDto'
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Bad Request",
+                "status":400,
+                "detail":"Request validation failed with the following errors: [name: 'must not be blank'].",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Collaborators
+  /api/v1/projects:
+    post:
+      description: |
+        Creates a new project. This project will be created without any collaborators, so it will not be
+        visible in the UI by default. To assign collaborators, use <code>PUT /api/v1/collaborators</code>.
+      operationId: createProject
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectDto'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectMetadataDto'
+          description: OK
+        "400":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Bad Request",
+                "status":400,
+                "detail":"Request validation failed with the following errors: [name: 'must not be blank'].",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Projects
+  /api/v1/projects/search:
+    post:
+      description: |
+        Searches for projects.<br/>
+        <ul>
+          <li><p><em>filter</em> specifies which fields should match. Only items that match the given fields will be
+           returned.</p>
+           <p/><strong>Note:</strong> Date fields need to be specified in a format compatible with
+           <code>java.time.ZonedDateTime</code>; for example <code>2023-09-20T11:31:20.206801604Z</code>.<br/><br/>
+           You can use suffixes to match date ranges:
+           <table>
+            <thead>
+             <tr><th>Modifier</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+             <tr><td>||/y</td><td>Within the year of the provided date</td></tr>
+             <tr><td>||/M</td><td>Within the month of the provided date</td></tr>
+             <tr><td>||/w</td><td>Within the week of the provided date</td></tr>
+             <tr><td>||/d</td><td>Within the day of the provided date</td></tr>
+             <tr><td>||/h</td><td>Within the hour of the provided date</td></tr>
+             <tr><td>||/m</td><td>Within the minute of the provided date</td></tr>
+             <tr><td>||/s</td><td>Within the second of the provided date</td></tr>
+            </tbody>
+           </table>
+           <br/>
+           <p>You can also use the following prefixes to filter before or after the date:</p>
+            <table>
+            <thead>
+             <tr><th>Operator</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+             <tr><td>&lt;</td><td>Before the provided date</td></tr>
+             <tr><td>&lt;=</td><td>On or before the provided date</td></tr>
+             <tr><td>&gt;</td><td>After the provided date</td></tr>
+             <tr><td>&gt;=</td><td>On or after the provided date</td></tr>
+            </tbody>
+            </table>
+            <p>Operator and modifier can be combined. Example:
+              <code>&gt;=2023-09-20T11:31:20.206801604Z||/y</code> returns all projects within or after 2023</p>
+          </p></li>
+          <li><p><em>sort</em> specifies by which fields and direction (<code>ASC</code>/<code>DESC</code>) the result
+           should be sorted.</p></li>
+          <li><p><em>page</em> specifies the page number to return.</p></li>
+          <li><p><em>size</em> specifies the number of items per page. The default value is 10.</p></li>
+        </ul>
+      operationId: searchProjects
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PubSearchDtoProjectMetadataDto'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PubSearchResultDtoProjectMetadataDto'
+          description: OK
+        "400":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Bad Request",
+                "status":400,
+                "detail":"Request validation failed with the following errors: [name: 'must not be blank'].",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Projects
+  /api/v1/milestones:
+    post:
+      operationId: createMilestone
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMilestoneDto'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MilestoneMetadataDto'
+          description: OK
+        "400":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Bad Request",
+                "status":400,
+                "detail":"Request validation failed with the following errors: [name: 'must not be blank'].",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Milestones
+  /api/v1/milestones/{milestoneId}/restore:
+    post:
+      operationId: restoreMilestone
+      parameters:
+      - explode: false
+        in: path
+        name: milestoneId
+        required: true
+        schema:
+          example: 7e39bfc3-32b2-46a7-b9d0-95f6549cd85e
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MilestoneMetadataDto'
+          description: OK
+        "403":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Forbidden",
+                "status":403,
+                "detail":"Operation not allowed.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Milestones
+  /api/v1/milestones/search:
+    post:
+      description: |
+        Searches for milestones.<br/>
+        <ul>
+          <li><p><em>filter</em> specifies which fields should match. Only items that match the given fields will be
+           returned.</p>
+           <p/><strong>Note:</strong> Date fields need to be specified in a format compatible with
+           <code>java.time.ZonedDateTime</code>; for example <code>2023-09-20T11:31:20.206801604Z</code>.<br/><br/>
+           You can use suffixes to match date ranges:
+           <table>
+            <thead>
+             <tr><th>Modifier</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+             <tr><td>||/y</td><td>Within the year of the provided date</td></tr>
+             <tr><td>||/M</td><td>Within the month of the provided date</td></tr>
+             <tr><td>||/w</td><td>Within the week of the provided date</td></tr>
+             <tr><td>||/d</td><td>Within the day of the provided date</td></tr>
+             <tr><td>||/h</td><td>Within the hour of the provided date</td></tr>
+             <tr><td>||/m</td><td>Within the minute of the provided date</td></tr>
+             <tr><td>||/s</td><td>Within the second of the provided date</td></tr>
+            </tbody>
+           </table>
+           <br/>
+           <p>You can also use the following prefixes to filter before or after the date:</p>
+            <table>
+            <thead>
+             <tr><th>Operator</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+             <tr><td>&lt;</td><td>Before the provided date</td></tr>
+             <tr><td>&lt;=</td><td>On or before the provided date</td></tr>
+             <tr><td>&gt;</td><td>After the provided date</td></tr>
+             <tr><td>&gt;=</td><td>On or after the provided date</td></tr>
+            </tbody>
+            </table>
+            <p>Operator and modifier can be combined. Example:
+              <code>&gt;=2023-09-20T11:31:20.206801604Z||/y</code> returns all milestones within or after 2023</p>
+          </p></li>
+          <li><p><em>sort</em> specifies by which fields and direction (<code>ASC</code>/<code>DESC</code>) the result
+           should be sorted.</p></li>
+          <li><p><em>page</em> specifies the page number to return.</p></li>
+          <li><p><em>size</em> specifies the number of items per page. The default value is 10.</p></li>
+        </ul>
+      operationId: searchMilestones
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PubSearchDtoMilestoneMetadataDto'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PubSearchResultDtoMilestoneMetadataDto'
+          description: OK
+        "400":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Bad Request",
+                "status":400,
+                "detail":"Request validation failed with the following errors: [name: 'must not be blank'].",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Milestones
+  /api/v1/folders:
+    post:
+      description: |
+        Creates a new folder.<br/>
+        <ul>
+          <li><p>When only <em>parentId</em> is given, the folder will be created in that
+              folder. The folder can be in any project of the same organization.</p></li>
+          <li><p>When <em>projectId</em> is given and <em>parentId</em> is either
+              null or omitted altogether, the folder will be created in the root of the project.</p></li>
+          <li><p>When <em>projectId</em> and <em>parentId</em> are both given,
+              they must be consistent - i.e. the parent folder is in the project.</p></li>
+        </ul>
+      operationId: createFolder
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFolderDto'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FolderMetadataDto'
+          description: OK
+        "400":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Bad Request",
+                "status":400,
+                "detail":"Request validation failed with the following errors: [name: 'must not be blank'].",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Folders
+  /api/v1/files:
+    post:
+      description: |
+        This endpoint creates a file.<br/>
+        <br/>
+        To create a file, specify <em>projectId</em> and/or <em>folderId</em>:
+        <ul>
+          <li><p>When only <em>folderId</em> is given, the file will be created in that
+              folder. The folder can be in any project of the same organization.</p></li>
+          <li><p>When <em>projectId</em> is given and <em>folderId</em> is either
+              null or omitted altogether, the file will be created in the root of the project.</p></li>
+          <li><p>When <em>projectId</em> and <em>folderId</em> are both given,
+              they must be consistent - i.e. the folder is in the project.</p></li>
+        </ul>
+        <p>For connector templates, the following constraints apply:</p>
+        <ul>
+          <li><p>The value of <em>content.$schema</em> will be replaced with
+              <em>https://unpkg.com/@camunda/zeebe-element-templates-json-schema/resources/schema.json
+              </em>
+              and validated against it.</p></li>
+          <li><p>The value of <em>name</em> takes precedence over <em>content.name</em>.
+              In case of mismatch, the latter will be adjusted to match the former automatically.</p></li>
+          <li><p>The value of <em>content.id</em> will be replaced with the file <em>id</em> generated by
+              Web Modeler.</p></li>
+          <li><p>The value of <em>content.version</em> is managed by Web Modeler and will be updated
+              automatically.</p></li>
+        </ul>
+        <p>
+          <strong>Note:</strong> The <code>simplePath</code> transforms any occurrences of slashes
+          (<code>/</code>) in file and folder names into an escape sequence consisting of a backslash
+          followed by a slash (<code>\/</code>). This form of escaping facilitates the processing of
+          path-like structures within file and folder names.
+        </p>
+      operationId: createFile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFileDto'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileMetadataDto'
+          description: OK
+        "400":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Bad Request",
+                "status":400,
+                "detail":"Request validation failed with the following errors: [name: 'must not be blank'].",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Files
+  /api/v1/files/search:
+    post:
+      description: |
+        Searches for files.<br/>
+        <ul>
+          <li><p><em>filter</em> specifies which fields should match. Only items that match the given
+           fields will be
+           returned.</p>
+           <p/><strong>Note:</strong> Date fields need to be specified in a format compatible with
+           <code>java.time.ZonedDateTime</code>; for example <code>2023-09-20T11:31:20.206801604Z</code>.
+           <br/><br/>
+           You can use suffixes to match date ranges:
+           <table>
+            <thead>
+             <tr><th>Modifier</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+             <tr><td>||/y</td><td>Within the year of the provided date</td></tr>
+             <tr><td>||/M</td><td>Within the month of the provided date</td></tr>
+             <tr><td>||/w</td><td>Within the week of the provided date</td></tr>
+             <tr><td>||/d</td><td>Within the day of the provided date</td></tr>
+             <tr><td>||/h</td><td>Within the hour of the provided date</td></tr>
+             <tr><td>||/m</td><td>Within the minute of the provided date</td></tr>
+             <tr><td>||/s</td><td>Within the second of the provided date</td></tr>
+            </tbody>
+           </table>
+           <br/>
+           <p>You can also use the following prefixes to filter before or after the date:</p>
+           <table>
+            <thead>
+             <tr><th>Operator</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+             <tr><td>&lt;</td><td>Before the provided date</td></tr>
+             <tr><td>&lt;=</td><td>On or before the provided date</td></tr>
+             <tr><td>&gt;</td><td>After the provided date</td></tr>
+             <tr><td>&gt;=</td><td>On or after the provided date</td></tr>
+            </tbody>
+           </table>
+           <p>Operator and modifier can be combined. Example:
+             <code>&gt;=2023-09-20T11:31:20.206801604Z||/y</code> returns all files within or after
+             2023</p>
+          </p></li>
+          <li><p><em>sort</em> specifies by which fields and direction
+           (<code>ASC</code>/<code>DESC</code>) the result
+           should be sorted.</p></li>
+          <p>
+            <strong>Note:</strong> Sorting by <code>simplePath</code> and <code>canonicalPath</code> is
+            not supported.
+          </p>
+          <li><p><em>page</em> specifies the page number to return.</p></li>
+          <li><p><em>size</em> specifies the number of items per page. The default value is 10.</p></li>
+        </ul>
+        <p>
+          <strong>Note:</strong> The <code>simplePath</code> transforms any occurrences of slashes
+          (<code>/</code>) in file and folder names into an escape sequence consisting of a backslash
+          followed by a slash (<code>\/</code>). This form of escaping facilitates the processing of
+          path-like structures within file and folder names.
+        </p>
+      operationId: searchFiles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PubSearchDtoFileMetadataDto'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PubSearchResultDtoFileMetadataDto'
+          description: OK
+        "400":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Bad Request",
+                "status":400,
+                "detail":"Request validation failed with the following errors: [name: 'must not be blank'].",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Files
+  /api/v1/collaborators/search:
+    post:
+      description: |
+        Searches for collaborators.<br/>
+        <ul>
+          <li><p><em>filter</em> specifies which fields should match. Only items that match the given fields will be
+           returned.</p></li>
+          <li><p><em>sort</em> specifies by which fields and direction (<code>ASC</code>/<code>DESC</code>) the result
+           should be sorted.</p></li>
+          <p>
+            <strong>Note:</strong> Sorting by <code>role</code> is not supported.
+          </p>
+          <li><p><em>page</em> specifies the page number to return.</p></li>
+          <li><p><em>size</em> specifies the number of items per page. The default value is 10.</p></li>
+        </ul>
+      operationId: searchCollaborators
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PubSearchDtoProjectCollaboratorDto'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PubSearchResultDtoProjectCollaboratorDto'
+          description: OK
+        "400":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Bad Request",
+                "status":400,
+                "detail":"Request validation failed with the following errors: [name: 'must not be blank'].",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Collaborators
+  /api/v1/projects/{projectId}:
+    delete:
+      description: |-
+        This endpoint deletes an empty project. A project is considered empty if there are no files in it.
+         Deletion of resources is recursive and cannot be undone.
+      operationId: deleteProject
+      parameters:
+      - explode: false
+        in: path
+        name: projectId
+        required: true
+        schema:
+          example: 7e39bfc3-32b2-46a7-b9d0-95f6549cd85e
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: No Content
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Projects
+    get:
+      operationId: getProject
+      parameters:
+      - explode: false
+        in: path
+        name: projectId
+        required: true
+        schema:
+          example: 7e39bfc3-32b2-46a7-b9d0-95f6549cd85e
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDto'
+          description: OK
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Projects
+    patch:
+      operationId: updateProject
+      parameters:
+      - explode: false
+        in: path
+        name: projectId
+        required: true
+        schema:
+          example: 7e39bfc3-32b2-46a7-b9d0-95f6549cd85e
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProjectDto'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectMetadataDto'
+          description: OK
+        "400":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Bad Request",
+                "status":400,
+                "detail":"Request validation failed with the following errors: [name: 'must not be blank'].",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Projects
+  /api/v1/milestones/{milestoneId}:
+    delete:
+      description: Deletion of resources is recursive and cannot be undone.
+      operationId: deleteMilestone
+      parameters:
+      - explode: false
+        in: path
+        name: milestoneId
+        required: true
+        schema:
+          example: 7e39bfc3-32b2-46a7-b9d0-95f6549cd85e
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: No Content
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Milestones
+    get:
+      operationId: getMilestone
+      parameters:
+      - explode: false
+        in: path
+        name: milestoneId
+        required: true
+        schema:
+          example: 7e39bfc3-32b2-46a7-b9d0-95f6549cd85e
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MilestoneDto'
+          description: OK
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Milestones
+    patch:
+      operationId: patchMilestone
+      parameters:
+      - explode: false
+        in: path
+        name: milestoneId
+        required: true
+        schema:
+          example: 7e39bfc3-32b2-46a7-b9d0-95f6549cd85e
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMilestoneDto'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MilestoneMetadataDto'
+          description: OK
+        "400":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Bad Request",
+                "status":400,
+                "detail":"Request validation failed with the following errors: [name: 'must not be blank'].",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Milestones
+  /api/v1/folders/{folderId}:
+    delete:
+      description: |-
+        This endpoint deletes an empty folder. A folder is considered empty if there are no files in it.
+         Deletion of resources is recursive and cannot be undone.
+      operationId: deleteFolder
+      parameters:
+      - explode: false
+        in: path
+        name: folderId
+        required: true
+        schema:
+          example: 7e39bfc3-32b2-46a7-b9d0-95f6549cd85e
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: No Content
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Folders
+    get:
+      operationId: getFolder
+      parameters:
+      - explode: false
+        in: path
+        name: folderId
+        required: true
+        schema:
+          example: 7e39bfc3-32b2-46a7-b9d0-95f6549cd85e
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FolderDto'
+          description: OK
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Folders
+    patch:
+      description: |
+        This endpoint updates the name or location of a folder, or both at the same time.<br/>
+        <br/>
+        To move a folder, specify <em>projectId</em> and/or <em>parentId</em>:
+        <ul>
+          <li><p>When only <em>parentId</em> is given, the file will be moved to that
+              folder. The folder must keep in the same organization.</p></li>
+          <li><p>When <em>projectId</em> is given and <em>parentId</em> is either
+              null or omitted altogether, the file will be moved to the root of the project.</p></li>
+          <li><p>When <em>projectId</em> and <em>parentId</em> are both given,
+              they must be consistent - i.e. the new parent folder is in the new project.</p></li>
+        </ul>
+      operationId: patchFolder
+      parameters:
+      - explode: false
+        in: path
+        name: folderId
+        required: true
+        schema:
+          example: 7e39bfc3-32b2-46a7-b9d0-95f6549cd85e
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFolderDto'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FolderMetadataDto'
+          description: OK
+        "400":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Bad Request",
+                "status":400,
+                "detail":"Request validation failed with the following errors: [name: 'must not be blank'].",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Folders
+  /api/v1/files/{fileId}:
+    delete:
+      description: |-
+        Deletes a file.<br/>
+        <br/>
+        <strong>Note:</strong> Deleting a file will also delete other resources attached to the file (comments,
+         call activity/business rule task links, milestones and shares) which might have side-effects.
+         Deletion of resources is recursive and cannot be undone.
+      operationId: deleteFile
+      parameters:
+      - explode: false
+        in: path
+        name: fileId
+        required: true
+        schema:
+          example: 7e39bfc3-32b2-46a7-b9d0-95f6549cd85e
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: No Content
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Files
+    get:
+      description: |
+        Retrieves a file.<br/>
+        <br/>
+        <p>
+          <strong>Note:</strong> The <code>simplePath</code> transforms any occurrences of slashes
+          (<code>/</code>) in file and folder names into an escape sequence consisting of a backslash
+          followed by a slash (<code>\/</code>). This form of escaping facilitates the processing of
+          path-like structures within file and folder names.
+        </p>
+      operationId: getFile
+      parameters:
+      - explode: false
+        in: path
+        name: fileId
+        required: true
+        schema:
+          example: 7e39bfc3-32b2-46a7-b9d0-95f6549cd85e
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileDto'
+          description: OK
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Files
+    patch:
+      description: |
+        This endpoint updates the content, name, or location of a file, or all at the same time.<br/>
+        <br/>
+        To move a file, specify <em>projectId</em> and/or <em>folderId</em>:
+        <ul>
+          <li><p>When only <em>folderId</em> is given, the file will be moved to that
+              folder. The folder can be in another project of the same organization.</p></li>
+          <li><p>When <em>projectId</em> is given and <em>folderId</em> is either
+              null or omitted altogether, the file will be moved to the root of the project.</p></li>
+          <li><p>When <em>projectId</em> and <em>folderId</em> are both given,
+              they must be consistent - i.e. the new parent folder is in the new project.</p></li>
+        </ul>
+        <p>The field <em>revision</em> holds the current revision of the file. This is used for detecting
+        and preventing concurrent modifications.</p>
+        <p>For connector templates, the following constraints apply:</p>
+          <ul>
+            <li><p>The value of <em>content.$schema</em> is not updatable.</p></li>
+            <li><p>The value of <em>content.name</em> can only be changed via <em>name</em>.</p></li>
+            <li><p>The value of <em>content.id</em> is not updatable.</p></li>
+            <li><p>The value of <em>content.version</em> is managed by Web Modeler and will be updated
+                automatically.</p></li>
+          </ul>
+          <p>
+            <strong>Note:</strong> The <code>simplePath</code> transforms any occurrences of slashes
+            (<code>/</code>) in file and folder names into an escape sequence consisting of a backslash
+            followed by a slash (<code>\/</code>). This form of escaping facilitates the processing of
+            path-like structures within file and folder names.
+          </p>
+      operationId: patchFile
+      parameters:
+      - explode: false
+        in: path
+        name: fileId
+        required: true
+        schema:
+          example: 7e39bfc3-32b2-46a7-b9d0-95f6549cd85e
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFileDto'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileMetadataDto'
+          description: OK
+        "400":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Bad Request",
+                "status":400,
+                "detail":"Request validation failed with the following errors: [name: 'must not be blank'].",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Forbidden",
+                "status":403,
+                "detail":"Operation not allowed.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Conflict",
+                "status":409,
+                "detail":"There was a revision conflict while processing your file.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Conflict
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Files
+  /api/v1/milestones/compare/{milestone1Id}...{milestone2Id}:
+    get:
+      description: |
+        Returns a link to a visual comparison between two milestones where the milestone referenced by
+        <code>milestone1Id</code> acts as a baseline to compare the milestone referenced by <code>milestone2Id</code>
+        against.
+      operationId: compareMilestones
+      parameters:
+      - explode: false
+        in: path
+        name: milestone1Id
+        required: true
+        schema:
+          example: 7e39bfc3-32b2-46a7-b9d0-95f6549cd85e
+          format: uuid
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: milestone2Id
+        required: true
+        schema:
+          example: 7e39bfc3-32b2-46a7-b9d0-95f6549cd85e
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MilestoneComparisonDto'
+          description: OK
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Milestones
+  /api/v1/info:
+    get:
+      operationId: getInfo
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InfoDto'
+          description: OK
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Info
+  /api/v1/projects/{projectId}/collaborators/{email}:
+    delete:
+      description: Deletion of resources is recursive and cannot be undone.
+      operationId: deleteCollaborator
+      parameters:
+      - explode: false
+        in: path
+        name: projectId
+        required: true
+        schema:
+          example: 7e39bfc3-32b2-46a7-b9d0-95f6549cd85e
+          format: uuid
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: email
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: No Content
+        "404":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                 "title":"Not Found",
+                 "status":404,
+                 "detail":"Resource not found.",
+                 "instance":"/api/v1/resource/id"
+                 }
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              example: |-
+                {
+                "type":"about:blank",
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"Unexpected error while processing request.",
+                "instance":"/api/v1/resource/id"
+                }
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      tags:
+      - Collaborators
+components:
+  schemas:
+    CreateCollaboratorDto:
+      example:
+        role: role
+        projectId: projectId
+        email: email
+      properties:
+        email:
+          maxLength: 255
+          minLength: 1
+          type: string
+        projectId:
+          maxLength: 255
+          minLength: 1
+          type: string
+        role:
+          description: "Allowed values are: \"project_admin\", \"editor\", \"viewer\"\
+            \ and \"commenter\""
+          pattern: ^project_admin|editor|viewer|commenter$
+          type: string
+      required:
+      - email
+      - projectId
+      - role
+      type: object
+    CreateProjectDto:
+      example:
+        name: name
+      properties:
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - name
+      type: object
+    ProjectMetadataDto:
+      example:
+        updatedBy:
+          name: name
+          email: email
+        createdBy:
+          name: name
+          email: email
+        created: created
+        name: name
+        id: id
+        updated: updated
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        created:
+          type: string
+        createdBy:
+          $ref: '#/components/schemas/UserDto'
+        updated:
+          type: string
+        updatedBy:
+          $ref: '#/components/schemas/UserDto'
+      type: object
+    UserDto:
+      example:
+        name: name
+        email: email
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+      type: object
+    PubSearchDtoProjectMetadataDto:
+      example:
+        filter:
+          updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          id: id
+          updated: updated
+        size: 30
+        sort:
+        - field: field
+          direction: ASC
+        - field: field
+          direction: ASC
+        page: 0
+      properties:
+        filter:
+          $ref: '#/components/schemas/ProjectMetadataDto'
+        sort:
+          items:
+            $ref: '#/components/schemas/SortDto'
+          type: array
+        page:
+          format: int32
+          minimum: 0
+          type: integer
+        size:
+          format: int32
+          maximum: 50
+          minimum: 0
+          type: integer
+      type: object
+    SortDto:
+      example:
+        field: field
+        direction: ASC
+      properties:
+        field:
+          type: string
+        direction:
+          enum:
+          - ASC
+          - DESC
+          type: string
+      required:
+      - direction
+      - field
+      type: object
+    PubSearchResultDtoProjectMetadataDto:
+      example:
+        total: 0
+        items:
+        - updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          id: id
+          updated: updated
+        - updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          id: id
+          updated: updated
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/ProjectMetadataDto'
+          type: array
+        total:
+          format: int32
+          type: integer
+      type: object
+    CreateMilestoneDto:
+      example:
+        name: name
+        fileId: fileId
+      properties:
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+        fileId:
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - fileId
+      - name
+      type: object
+    MilestoneMetadataDto:
+      example:
+        updatedBy:
+          name: name
+          email: email
+        createdBy:
+          name: name
+          email: email
+        created: created
+        name: name
+        id: id
+        updated: updated
+        fileId: fileId
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        fileId:
+          type: string
+        created:
+          type: string
+        createdBy:
+          $ref: '#/components/schemas/UserDto'
+        updated:
+          type: string
+        updatedBy:
+          $ref: '#/components/schemas/UserDto'
+      type: object
+    PubSearchDtoMilestoneMetadataDto:
+      example:
+        filter:
+          updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          id: id
+          updated: updated
+          fileId: fileId
+        size: 30
+        sort:
+        - field: field
+          direction: ASC
+        - field: field
+          direction: ASC
+        page: 0
+      properties:
+        filter:
+          $ref: '#/components/schemas/MilestoneMetadataDto'
+        sort:
+          items:
+            $ref: '#/components/schemas/SortDto'
+          type: array
+        page:
+          format: int32
+          minimum: 0
+          type: integer
+        size:
+          format: int32
+          maximum: 50
+          minimum: 0
+          type: integer
+      type: object
+    PubSearchResultDtoMilestoneMetadataDto:
+      example:
+        total: 0
+        items:
+        - updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          id: id
+          updated: updated
+          fileId: fileId
+        - updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          id: id
+          updated: updated
+          fileId: fileId
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/MilestoneMetadataDto'
+          type: array
+        total:
+          format: int32
+          type: integer
+      type: object
+    CreateFolderDto:
+      example:
+        name: name
+        projectId: projectId
+        parentId: parentId
+      properties:
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+        projectId:
+          maxLength: 255
+          minLength: 1
+          type: string
+        parentId:
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - name
+      type: object
+    FolderMetadataDto:
+      example:
+        updatedBy:
+          name: name
+          email: email
+        createdBy:
+          name: name
+          email: email
+        created: created
+        name: name
+        id: id
+        projectId: projectId
+        updated: updated
+        parentId: parentId
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        projectId:
+          type: string
+        parentId:
+          type: string
+        created:
+          type: string
+        updated:
+          type: string
+        createdBy:
+          $ref: '#/components/schemas/UserDto'
+        updatedBy:
+          $ref: '#/components/schemas/UserDto'
+      type: object
+    CreateFileDto:
+      example:
+        name: name
+        projectId: projectId
+        folderId: folderId
+        content: content
+        fileType: fileType
+      properties:
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+        folderId:
+          maxLength: 255
+          minLength: 1
+          type: string
+        projectId:
+          maxLength: 255
+          minLength: 1
+          type: string
+        content:
+          type: string
+        fileType:
+          description: "Allowed values are: \"bpmn\", \"dmn\", \"form\" and \"connector_template\""
+          pattern: ^bpmn|dmn|form|connector_template$
+          type: string
+      required:
+      - content
+      - fileType
+      - name
+      type: object
+    FileMetadataDto:
+      example:
+        updatedBy:
+          name: name
+          email: email
+        createdBy:
+          name: name
+          email: email
+        created: created
+        name: name
+        canonicalPath:
+        - name: name
+          id: id
+        - name: name
+          id: id
+        id: id
+        type: type
+        projectId: projectId
+        updated: updated
+        folderId: folderId
+        simplePath: simplePath
+        revision: 0
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        projectId:
+          type: string
+        folderId:
+          type: string
+        simplePath:
+          type: string
+        canonicalPath:
+          items:
+            $ref: '#/components/schemas/PathElementDto'
+          type: array
+        revision:
+          format: int32
+          type: integer
+        type:
+          type: string
+        created:
+          type: string
+        createdBy:
+          $ref: '#/components/schemas/UserDto'
+        updated:
+          type: string
+        updatedBy:
+          $ref: '#/components/schemas/UserDto'
+      type: object
+    PathElementDto:
+      example:
+        name: name
+        id: id
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      type: object
+    PubSearchDtoFileMetadataDto:
+      example:
+        filter:
+          updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          canonicalPath:
+          - name: name
+            id: id
+          - name: name
+            id: id
+          id: id
+          type: type
+          projectId: projectId
+          updated: updated
+          folderId: folderId
+          simplePath: simplePath
+          revision: 0
+        size: 30
+        sort:
+        - field: field
+          direction: ASC
+        - field: field
+          direction: ASC
+        page: 0
+      properties:
+        filter:
+          $ref: '#/components/schemas/FileMetadataDto'
+        sort:
+          items:
+            $ref: '#/components/schemas/SortDto'
+          type: array
+        page:
+          format: int32
+          minimum: 0
+          type: integer
+        size:
+          format: int32
+          maximum: 50
+          minimum: 0
+          type: integer
+      type: object
+    PubSearchResultDtoFileMetadataDto:
+      example:
+        total: 0
+        items:
+        - updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          canonicalPath:
+          - name: name
+            id: id
+          - name: name
+            id: id
+          id: id
+          type: type
+          projectId: projectId
+          updated: updated
+          folderId: folderId
+          simplePath: simplePath
+          revision: 0
+        - updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          canonicalPath:
+          - name: name
+            id: id
+          - name: name
+            id: id
+          id: id
+          type: type
+          projectId: projectId
+          updated: updated
+          folderId: folderId
+          simplePath: simplePath
+          revision: 0
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/FileMetadataDto'
+          type: array
+        total:
+          format: int32
+          type: integer
+      type: object
+    ProjectCollaboratorDto:
+      example:
+        role: role
+        name: name
+        projectId: projectId
+        email: email
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        projectId:
+          type: string
+        role:
+          type: string
+      type: object
+    PubSearchDtoProjectCollaboratorDto:
+      example:
+        filter:
+          role: role
+          name: name
+          projectId: projectId
+          email: email
+        size: 30
+        sort:
+        - field: field
+          direction: ASC
+        - field: field
+          direction: ASC
+        page: 0
+      properties:
+        filter:
+          $ref: '#/components/schemas/ProjectCollaboratorDto'
+        sort:
+          items:
+            $ref: '#/components/schemas/SortDto'
+          type: array
+        page:
+          format: int32
+          minimum: 0
+          type: integer
+        size:
+          format: int32
+          maximum: 50
+          minimum: 0
+          type: integer
+      type: object
+    PubSearchResultDtoProjectCollaboratorDto:
+      example:
+        total: 0
+        items:
+        - role: role
+          name: name
+          projectId: projectId
+          email: email
+        - role: role
+          name: name
+          projectId: projectId
+          email: email
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/ProjectCollaboratorDto'
+          type: array
+        total:
+          format: int32
+          type: integer
+      type: object
+    UpdateProjectDto:
+      example:
+        name: name
+      properties:
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - name
+      type: object
+    UpdateMilestoneDto:
+      example:
+        name: name
+      properties:
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - name
+      type: object
+    UpdateFolderDto:
+      example:
+        name: name
+        projectId: projectId
+        parentId: parentId
+      properties:
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+        projectId:
+          maxLength: 255
+          minLength: 1
+          type: string
+        parentId:
+          maxLength: 255
+          minLength: 1
+          type: string
+      type: object
+    UpdateFileDto:
+      example:
+        name: name
+        projectId: projectId
+        content: content
+        folderId: folderId
+        revision: 0
+      properties:
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+        content:
+          type: string
+        revision:
+          format: int32
+          type: integer
+        projectId:
+          maxLength: 255
+          minLength: 1
+          type: string
+        folderId:
+          maxLength: 255
+          minLength: 1
+          type: string
+      required:
+      - revision
+      type: object
+    ProjectContent:
+      example:
+        folders:
+        - updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          id: id
+          projectId: projectId
+          updated: updated
+          parentId: parentId
+        - updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          id: id
+          projectId: projectId
+          updated: updated
+          parentId: parentId
+        files:
+        - updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          canonicalPath:
+          - name: name
+            id: id
+          - name: name
+            id: id
+          id: id
+          type: type
+          projectId: projectId
+          updated: updated
+          folderId: folderId
+          simplePath: simplePath
+          revision: 0
+        - updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          canonicalPath:
+          - name: name
+            id: id
+          - name: name
+            id: id
+          id: id
+          type: type
+          projectId: projectId
+          updated: updated
+          folderId: folderId
+          simplePath: simplePath
+          revision: 0
+      properties:
+        folders:
+          items:
+            $ref: '#/components/schemas/FolderMetadataDto'
+          type: array
+        files:
+          items:
+            $ref: '#/components/schemas/FileMetadataDto'
+          type: array
+      type: object
+    ProjectDto:
+      example:
+        metadata:
+          updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          id: id
+          updated: updated
+        content:
+          folders:
+          - updatedBy:
+              name: name
+              email: email
+            createdBy:
+              name: name
+              email: email
+            created: created
+            name: name
+            id: id
+            projectId: projectId
+            updated: updated
+            parentId: parentId
+          - updatedBy:
+              name: name
+              email: email
+            createdBy:
+              name: name
+              email: email
+            created: created
+            name: name
+            id: id
+            projectId: projectId
+            updated: updated
+            parentId: parentId
+          files:
+          - updatedBy:
+              name: name
+              email: email
+            createdBy:
+              name: name
+              email: email
+            created: created
+            name: name
+            canonicalPath:
+            - name: name
+              id: id
+            - name: name
+              id: id
+            id: id
+            type: type
+            projectId: projectId
+            updated: updated
+            folderId: folderId
+            simplePath: simplePath
+            revision: 0
+          - updatedBy:
+              name: name
+              email: email
+            createdBy:
+              name: name
+              email: email
+            created: created
+            name: name
+            canonicalPath:
+            - name: name
+              id: id
+            - name: name
+              id: id
+            id: id
+            type: type
+            projectId: projectId
+            updated: updated
+            folderId: folderId
+            simplePath: simplePath
+            revision: 0
+      properties:
+        metadata:
+          $ref: '#/components/schemas/ProjectMetadataDto'
+        content:
+          $ref: '#/components/schemas/ProjectContent'
+      type: object
+    MilestoneDto:
+      example:
+        metadata:
+          updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          id: id
+          updated: updated
+          fileId: fileId
+        content: content
+      properties:
+        metadata:
+          $ref: '#/components/schemas/MilestoneMetadataDto'
+        content:
+          type: string
+      type: object
+    MilestoneComparisonDto:
+      example:
+        url: url
+      properties:
+        url:
+          type: string
+      type: object
+    InfoDto:
+      example:
+        authorizedOrganization: authorizedOrganization
+        deletePermission: true
+        readPermission: true
+        updatePermission: true
+        version: version
+        createPermission: true
+      properties:
+        version:
+          type: string
+        authorizedOrganization:
+          type: string
+        createPermission:
+          type: boolean
+        readPermission:
+          type: boolean
+        updatePermission:
+          type: boolean
+        deletePermission:
+          type: boolean
+      type: object
+    FolderContentDto:
+      example:
+        folders:
+        - updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          id: id
+          projectId: projectId
+          updated: updated
+          parentId: parentId
+        - updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          id: id
+          projectId: projectId
+          updated: updated
+          parentId: parentId
+        files:
+        - updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          canonicalPath:
+          - name: name
+            id: id
+          - name: name
+            id: id
+          id: id
+          type: type
+          projectId: projectId
+          updated: updated
+          folderId: folderId
+          simplePath: simplePath
+          revision: 0
+        - updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          canonicalPath:
+          - name: name
+            id: id
+          - name: name
+            id: id
+          id: id
+          type: type
+          projectId: projectId
+          updated: updated
+          folderId: folderId
+          simplePath: simplePath
+          revision: 0
+      properties:
+        folders:
+          items:
+            $ref: '#/components/schemas/FolderMetadataDto'
+          type: array
+        files:
+          items:
+            $ref: '#/components/schemas/FileMetadataDto'
+          type: array
+      type: object
+    FolderDto:
+      example:
+        metadata:
+          updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          id: id
+          projectId: projectId
+          updated: updated
+          parentId: parentId
+        content:
+          folders:
+          - updatedBy:
+              name: name
+              email: email
+            createdBy:
+              name: name
+              email: email
+            created: created
+            name: name
+            id: id
+            projectId: projectId
+            updated: updated
+            parentId: parentId
+          - updatedBy:
+              name: name
+              email: email
+            createdBy:
+              name: name
+              email: email
+            created: created
+            name: name
+            id: id
+            projectId: projectId
+            updated: updated
+            parentId: parentId
+          files:
+          - updatedBy:
+              name: name
+              email: email
+            createdBy:
+              name: name
+              email: email
+            created: created
+            name: name
+            canonicalPath:
+            - name: name
+              id: id
+            - name: name
+              id: id
+            id: id
+            type: type
+            projectId: projectId
+            updated: updated
+            folderId: folderId
+            simplePath: simplePath
+            revision: 0
+          - updatedBy:
+              name: name
+              email: email
+            createdBy:
+              name: name
+              email: email
+            created: created
+            name: name
+            canonicalPath:
+            - name: name
+              id: id
+            - name: name
+              id: id
+            id: id
+            type: type
+            projectId: projectId
+            updated: updated
+            folderId: folderId
+            simplePath: simplePath
+            revision: 0
+      properties:
+        metadata:
+          $ref: '#/components/schemas/FolderMetadataDto'
+        content:
+          $ref: '#/components/schemas/FolderContentDto'
+      type: object
+    FileDto:
+      example:
+        metadata:
+          updatedBy:
+            name: name
+            email: email
+          createdBy:
+            name: name
+            email: email
+          created: created
+          name: name
+          canonicalPath:
+          - name: name
+            id: id
+          - name: name
+            id: id
+          id: id
+          type: type
+          projectId: projectId
+          updated: updated
+          folderId: folderId
+          simplePath: simplePath
+          revision: 0
+        content: content
+      properties:
+        metadata:
+          $ref: '#/components/schemas/FileMetadataDto'
+        content:
+          type: string
+      type: object
+  securitySchemes:
+    Bearer:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
